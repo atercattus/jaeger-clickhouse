@@ -178,6 +178,26 @@ func (r *TraceReader) GetServices(ctx context.Context) ([]string, error) {
 	return r.getStrings(ctx, query)
 }
 
+func (r *TraceReader) GetTenants(ctx context.Context) ([]string, error) {
+	span, ctx := opentracing.StartSpanFromContext(ctx, "GetTenants")
+	defer span.Finish()
+
+	query := `SELECT DISTINCT tenant FROM tenant_services`
+	span.SetTag("db.statement", query)
+
+	return r.getStrings(ctx, query)
+}
+
+func (r *TraceReader) GetTenantServices(ctx context.Context, tenant string) ([]string, error) {
+	span, ctx := opentracing.StartSpanFromContext(ctx, "GetTenantServices")
+	defer span.Finish()
+
+	query := `SELECT DISTINCT service FROM tenant_services WHERE tenant = ?`
+	span.SetTag("db.statement", query)
+
+	return r.getStrings(ctx, query, tenant)
+}
+
 // GetOperations fetches operations in the service and empty slice if service does not exists
 func (r *TraceReader) GetOperations(
 	ctx context.Context,
